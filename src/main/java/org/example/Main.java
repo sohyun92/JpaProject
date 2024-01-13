@@ -5,48 +5,49 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
-import java.util.List;
 
 public class Main {
-    public static void main(String[] args) {
+   public static void main(String[] args) {
+        flushExam();
+    }
+
+    public static void flushExam() {
+       
+        //플러시 : 영속성 컨텍스트의 변경내용을 데이터베이스에 반영 (영속성 컨텍스트를 비우지 않음)
+        // 영속성 컨텍스트의 변경내용을 데이터베이스에 동기화
+
+        //플러시 발생
+        //1.-변경감지
+        //2.-수정된 엔티티 쓰기 지연 SQL 저장소에 등록
+        //3.-쓰기지연 SQL 저장소의 쿼리를 데이터베이스에 전송(등록,수정,삭제 쿼리)
+
+        //플러시 하는 방법
+        //em.flush -- (직접호출)
+        //트랜잭션 커밋 -- 자동 호출
+        //JPQL 쿼리 실행 -- 자동호출`
+
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("hello");
         EntityManager entityManager = emf.createEntityManager();
 
         EntityTransaction tx = entityManager.getTransaction();
-        tx.begin(); //데이터베이스 트랜잭션 시작
-        try {
-          // 저장
-          //  Member member = new Member();
-          //  member.setId(3L);
-          //  member.setName("HelloC");
-          //  entityManager.persist(member);//저장
+        tx.begin();
 
-            //삭제
-            //Member findMember = entityManager.find(Member.class,1L);
-            //entityManager.remove(findMember);
+        try{
+            Member member =new Member(200L,"member200");
+            entityManager.persist(member);
 
-            //수정
-            //findMember.setName("HelloJPA");
+            entityManager.flush();  // insert 가 즉시 나감
+            System.out.println("================");
+            tx.commit(); // 그리구 commit!
 
             /*
-            JPQL란
-            JPQL은 엔티티 객체를 대상으로 쿼리
-            SQL은 데이터베이스 테이블 대상으로 쿼리
-            테이블이 아닌 객체를 대상으로 검색하는 객체 지향 쿼리
-            SQL을 추상화해서 특정 데이터베이스 SQL에 의존 X
-            한마디로 정의하면 객체 지향 SQL !
-            */
+            *  플러시 모드 옵션
+            * em.setFlushMode(FlushModeType.COMMIT)
+            * FlushModeType.AUTO : 기본값
+            * FLushModeType.COMMIT : 커밋을 할 때만 FLUSH
+            *
+            * */
 
-            List<Member> result =entityManager.createQuery("select m from Member as m",Member.class)
-                    .setFirstResult(15)
-                    .setMaxResults(8)
-                    .getResultList();
-
-            for(Member member : result){
-                System.out.println(member);
-            }
-
-            tx.commit();
 
         }catch (Exception e){
             tx.rollback();
@@ -54,10 +55,60 @@ public class Main {
             entityManager.close();
         }
 
-        entityManager.close();
+    }
 
-        emf.close();
+    public static void study2Update() {
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("hello");
+        EntityManager entityManager = emf.createEntityManager();
 
+        EntityTransaction tx = entityManager.getTransaction();
+        tx.begin();
+        try{
+            //수정(변경감지)
+
+            Member member = entityManager.find(Member.class, 150L);
+            member.setName("ZZZZ");
+
+            //em.persist(member) <--- 이런거 있어야 update 되지않을까? ---> 쓰지않아도 데이터가 변경됨
+
+            System.out.println("================");
+
+            tx.commit(); // [트랜잭션 커밋]
+
+         }catch (Exception e){
+            tx.rollback();
+        }finally {
+            entityManager.close();
+    }
 
     }
+
+    public static void study2() {
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("hello");
+        EntityManager entityManager = emf.createEntityManager();
+
+        EntityTransaction tx = entityManager.getTransaction();
+        tx.begin(); //데이터베이스 트랜잭션 시작
+
+        try{
+            Member member1 = new Member(150L,"A");
+            Member member2 = new Member(160L,"A");
+
+            entityManager.persist(member1);
+            entityManager.persist(member2);
+            System.out.println("----------------");
+            //여기까지 INSERT SQL 을 데이터에 보내지않는다.
+
+            tx.commit(); //커밋하는 순간 데이터 베이스에 insert SQL을 보낸다.
+            /* persistence.xml 한번에 추가-->  <property name="hibernate.jdbc.batch.size" value="10"/>
+             */
+
+        }catch (Exception e){
+            tx.rollback();
+        }finally {
+            entityManager.close();
+        }
+    }
+
+
 }
