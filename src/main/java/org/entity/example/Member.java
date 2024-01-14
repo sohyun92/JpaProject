@@ -6,6 +6,10 @@ import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity(name ="Member") /*jpa가 관리하는 객체*/
+@SequenceGenerator(name="member_seq_generator",
+sequenceName = "member_seq",
+        initialValue = 1,
+        allocationSize = 50)
 public class Member {
   /*@Column
   * 1.name: 필드와 매핑할 테이블의 컬럼이름
@@ -16,7 +20,12 @@ public class Member {
   * */
 
     @Id //pk 매핑
+    //@Id : 직접할당
+    @GeneratedValue(strategy = GenerationType.IDENTITY) //: 자동생성
+    //IDENTITY : 기본키 생성을 데이터베이스에 위임
+    //@GeneratedValue(strategy = GenerationType.SEQUENCE,generator ="member_seq_generator" )
     private Long id;
+
 
     @Column(name="name",updatable = false ,columnDefinition = "varchar(100) default 'EMPTY'")   //db에는 name으로 쓸경우 컬럼매핑
     private String username;
@@ -51,59 +60,5 @@ public class Member {
         this.id = id;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
 
-    public void setAge(Integer age) {
-        this.age = age;
-    }
-
-    public void setRoleType(RoleType roleType) {
-        this.roleType = roleType;
-    }
-
-    public void setCreatedDate(Date createdDate) {
-        this.createdDate = createdDate;
-    }
-
-    public void setLastModifiedDate(Date lastModifiedDate) {
-        this.lastModifiedDate = lastModifiedDate;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public void setTemp(int temp) {
-        this.temp = temp;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public Integer getAge() {
-        return age;
-    }
-
-    public RoleType getRoleType() {
-        return roleType;
-    }
-
-    public Date getCreatedDate() {
-        return createdDate;
-    }
-
-    public Date getLastModifiedDate() {
-        return lastModifiedDate;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public int getTemp() {
-        return temp;
-    }
 }
