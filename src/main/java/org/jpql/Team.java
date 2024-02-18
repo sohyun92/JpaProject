@@ -11,6 +11,15 @@ public class Team {
     @GeneratedValue
     private Long id;
     private String username;
+
+    public List<Member> getMembers() {
+        return members;
+    }
+
+    public void setMembers(List<Member> members) {
+        this.members = members;
+    }
+
     @OneToMany(mappedBy = "team")
     private List<Member> members = new ArrayList<>();
 
